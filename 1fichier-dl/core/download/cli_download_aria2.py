@@ -4,8 +4,10 @@ import requests
 import lxml
 import time
 from .helpers import (get_proxy, convert_size, download_speed, is_valid_link)
+from .pyaria2 import PyAria2
 
 def download(url, password = None, payload={'dl_no_ssl': 'on', 'dlinline': 'on'}):
+        PyAria2().__init__
         if is_valid_link(url):
             if not 'https://' in url[0:8] and not 'http://' in url[0:7]:
                 url = f'https://{url}'
@@ -48,41 +50,10 @@ def download(url, password = None, payload={'dl_no_ssl': 'on', 'dlinline': 'on'}
             download(url)
         else:
             print("Bypassed,Getting link......")
-            if 'Content-Disposition' in r.headers:
-                old_url = url
-                url = html.xpath('/html/body/div[4]/div[2]/a')[0].get('href')
-            
-                headers = {
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 Safari/537.36',
-                    'Referer': old_url
-                }
+            old_url = url
+            url = html.xpath('/html/body/div[4]/div[2]/a')[0].get('href')
+            opts = {"header": ['User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 Safari/537.36', 'Referer: '+old_url+'']}
 
-                r = requests.get(url, stream=True, headers=headers)
-                
-                if 'Content-Disposition' in r.headers:
-                    name = r.headers['Content-Disposition'].split('"')[1]
-
-                    if os.path.exists(f'{name}'):
-                        i = 1
-                        while os.path.exists(f'({i}) {name}'):
-                            i += 1
-                        name = f'({i}) {name}'
-
-                    name = f'{name}.unfinished' if name[-11:] != '.unfinished' else name
-
-                    print(f'Downloading: {name[:-11]}')
-
-                    with open(name, 'ab') as f:
-                        chunk_size = 8192
-                        bytes_read = 0
-                        start = time.time()
-                        for chunk in r.iter_content(chunk_size):
-                            f.write(chunk)
-                            bytes_read += len(chunk)
-                            total_per = 100 * (float(bytes_read))
-                            total_per /= float(r.headers['Content-Length'])
-                            dl_speed = download_speed(bytes_read, start)
-                            print(f'\r| {round(total_per, 1)}% | {dl_speed} '.ljust(21), end='', flush=True)
-                    print(f'| {round(total_per, 1)}% | Finished.'.ljust(21))
-                    os.rename(name, name[:-11])
-                    return
+            PyAria2().addUri([url], options=opts)
+            print("Download sent to aria2.")
+            return

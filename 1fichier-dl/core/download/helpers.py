@@ -5,14 +5,13 @@ import time
 import lxml.html
 
 PROXY_TXT_API = 'https://www.proxyscan.io/api/proxy?type=https&format=txt'
-PLATFORM = os.name
 
 def get_proxy() -> str:
     '''
     Get proxy (str) from API.
     '''
-    proxy = requests.get(PROXY_TXT_API).text
-    proxy = {'https': proxy.rstrip()} if PLATFORM == 'nt' else {'https': f'https://{proxy}'}
+    proxy = requests.get(PROXY_TXT_API).text.rstrip()
+    proxy = {'https': f'http://{proxy}'}    # For urllib3 1.26
     return proxy
 
 def convert_size(size_bytes: int) -> str:

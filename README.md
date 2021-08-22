@@ -8,9 +8,14 @@
 </p>
 
 ## Features
-⭐ Manage your downloads
+⭐ Manage your downloads 
 
-⭐ Bypass time limits
+⭐ Bypass time limits 
+
+## Mod
+* Modded to download using aria2 with command line. (Aria2 RPC config is in core\download\pyaria2.py) 
+* Add Aria2_down.bat to download multi links with aria2. 
+* Fixed urllib 1.26 problem 
 
 ## Credits
 * All icons, including the app icon, were provided by [Feather](https://feathericons.com/).
