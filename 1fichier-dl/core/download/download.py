@@ -7,14 +7,17 @@ import PyQt5.sip
 from PyQt5.QtGui import QStandardItem
 from PyQt5.QtWidgets import QProgressBar
 from .helpers import *
+from sys import getrecursionlimit
 
-def download(worker, payload = {'dl_no_ssl': 'on', 'dlinline': 'on'}, downloaded_size = 0):
+def download(worker, payload = {'dl_no_ssl': 'on', 'dlinline': 'on'}, downloaded_size = 0, iteration = 0):
     '''
     Name is self-explanatory.
     1 - Get direct 1Fichier link using proxies.
     2 - Attempt to download the file.
     '''
-
+    if (iteration >= getrecursionlimit() - 1):
+        logging.debug("Max recursion reached!")
+        raise DownloadRecursionError("Max recursion reached!")
     if worker.dl_name:
         try:
             downloaded_size = os.path.getsize(worker.dl_directory + '/' + worker.dl_name)
@@ -80,7 +83,7 @@ def download(worker, payload = {'dl_no_ssl': 'on', 'dlinline': 'on'}, downloaded
                 else:
                     worker.stopped = True
                     return None if not worker.dl_name else worker.dl_name
-        download(worker)
+        download(worker, iteration=iteration + 1)
     else:
         logging.debug('Parsed direct link.')
         old_url = url
@@ -129,5 +132,5 @@ def download(worker, payload = {'dl_no_ssl': 'on', 'dlinline': 'on'}, downloaded
             worker.signals.update_signal.emit(worker.data, [None, None, 'Complete'])
         else:
             logging.debug('No Content-Disposition header. Restarting download.')
-            download(worker)
+            download(worker, iteration=iteration + 1)
     return

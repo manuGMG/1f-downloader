@@ -2,7 +2,7 @@ import os
 from .download import *
 from PyQt5.QtCore import Qt, QObject, QRunnable, pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QStandardItem
-from .helpers import is_valid_link
+from .helpers import is_valid_link, DownloadRecursionError
 
 class WorkerSignals(QObject):
     download_signal = pyqtSignal(list, str, bool, str, int)
@@ -120,7 +120,11 @@ class DownloadWorker(QRunnable):
 
     @pyqtSlot()
     def run(self):
-        dl_name = download(self)
+        try:
+            dl_name = download(self)
+        except DownloadRecursionError:
+            self.signals.update_signal.emit(self.data, [None, None, 'Error, Please retry', '0 B/s'])
+            return
         self.dl_name = dl_name
 
         if dl_name and self.stopped:

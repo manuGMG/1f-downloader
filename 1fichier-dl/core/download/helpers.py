@@ -8,6 +8,9 @@ FIRST_RUN = True
 PROXY_TXT_API = 'https://www.proxyscan.io/api/proxy?type=https&format=txt&limit=20'
 PLATFORM = os.name
 
+class DownloadRecursionError(Exception):
+    pass
+
 def get_proxies(settings: str) -> list:
     '''
     Get proxies (str) from API.
